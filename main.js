@@ -18,8 +18,8 @@ function init() {
 
   mapload(function(event) {
     load_map(event);
-    //requestAnimationFrame(updata)
     stageSetup()
+    requestAnimationFrame(updata)
   });
 }
 function mapload(onload) {
@@ -46,18 +46,19 @@ function load_map(event) {
 
 }
 function stageSetup() {
-  image.addEventListener("load", function() {
-    for (var i = 0; i < layer.length; i++) {
-      for (var y = 0; y < map_height; y++) {
-        for (var x = 0; x < map_width; x++) {
-          var id = layer[i].data[x + y * map_width] - 1
-          var image_x = (id % 16) * 32
-          var image_y = Math.floor(id / 16) * 32
-          ctx.drawImage(image, image_x, image_y, 32, 32, x * 32, y * 32, 32, 32);
-        }
+  image.addEventListener("load", renderSteage())
+}
+function renderSteage() {
+  for (var i = 0; i < layer.length; i++) {
+    for (var y = 0; y < map_height; y++) {
+      for (var x = 0; x < map_width; x++) {
+        var id = layer[i].data[x + y * map_width] - 1
+        var image_x = (id % 16) * 32
+        var image_y = Math.floor(id / 16) * 32
+        ctx.drawImage(image, image_x, image_y, 32, 32, x * 32, y * 32, 32, 32);
       }
     }
-  })
+  }
 }
 
 function updata() {
@@ -72,7 +73,7 @@ function render() {
 
       break;
     case "game":
-      stageSetup();
+      renderSteage();
       break;
   }
 
