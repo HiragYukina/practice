@@ -11,8 +11,8 @@ var canvas,
   ctx,
   image
 var camera = {
-  x: 0,
-  y: 0
+  x: 120,
+  y: 100
 }
 var gamemode = "game"
 window.addEventListener("DOMContentLoaded", init)
@@ -25,6 +25,15 @@ function init() {
   //タイル読み込み
   image = new Image();
   image.src = "images/map_images/map1.png"
+  image.addEventListener("load", function() {
+    backcanvas = document.createElement("canvas")
+    backcanvas.width = 512
+    backcanvas.height = 512
+    const backctx = backcanvas.getContext("2d")
+    backctx.drawImage(image, 0, 0)
+    image = backcanvas
+  })
+
   //マップの生成
   mapload(function(event) {
     load_map(event);
@@ -64,27 +73,37 @@ function renderSteage() {
   const screen_width = 640
   const screen_height = 480
 
-  const startTileX = Math.floor((camera.x - screen_width / 2) / tile_rect.x)
-  const startTileY = Math.floor((camera.y - screen_height / 2) / tile_rect.y)
+  const screenLeft = camera.x - screen_width / 2
+  const screenTop = camera.y - screen_height / 2
+
+  const startTileX = Math.floor(screenLeft / tile_rect.x)
+  const startTileY = Math.floor(screenTop / tile_rect.y)
 
   //レイヤー
   for (var i = 0; i < layer.length; i++) {
     //縦幅
-    for (var y = startTileY; y < map_height; y++) {
+    for (var y = 0; y < (screen_height / 32) + 1; y++) {
       //横幅
-      for (var x = startTileX; x < map_width; x++) {
+      for (var x = 0; x < (screen_width / 32) + 1; x++) {
 
-        var id = layer[i].data[x + y * map_width] - 1
-        var image_x = (id % 16) * tile_rect.x
-        var image_y = Math.floor(id / 16) * tile_rect.y
-        //         タイル画像、トリミング　ｘ、ｙ、 タイル幅ｘ、ｙ、　　　　    描画開始位置　ｘ、　ｙ　　　　　　　　描画タイルｘ、ｙ、
-        ctx.drawImage(image, image_x, image_y, tile_rect.x, tile_rect.y, x * tile_rect.x, y * tile_rect.y, tile_rect.x, tile_rect.y);
+        const index = startTileX + x + (startTileY + y) * map_width
+        if (index < 0 || index >= layer[i].data.length) {
+          continue
+        }
+        var id = layer[i].data[index] - 1
+        var sx = (id % 16) * tile_rect.x
+        var sy = Math.floor(id / 16) * tile_rect.y
+        const dx = x * tile_rect.x - screenLeft % tile_rect.x
+        const dy = y * tile_rect.y - screenTop % tile_rect.y
+        //         タイル画像、トリミング　ｘ、ｙ、 タイル幅ｘ、ｙ、描画開始位置　ｘ、　ｙ　　　　　　　　描画タイルｘ、ｙ、
+        ctx.drawImage(image, sx, sy, tile_rect.x, tile_rect.y, dx, dy, tile_rect.x, tile_rect.y);
       }
     }
   }
 }
 function updata() {
   requestAnimationFrame(updata)
+  camera.x++;
   render()
 }
 
@@ -96,6 +115,21 @@ function render() {
       break;
     case "game":
       renderSteage();
+      var keystate = {
+        "a": false,
+        "d": false,
+        "x": false,
+        "s": false
+      };
+
+      //キーイベント
+      window.addEventListener("keydown", function(e) {
+        keystate[e.key] = true;
+      });
+      window.addEventListener("keyup", function(e) {
+        keystate[e.key] = false;
+      });
+
       break;
   }
 
