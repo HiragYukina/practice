@@ -1,4 +1,5 @@
-var layers,
+//マップ
+let layers,
   map_width,
   map_height,
   tile_rect = {
@@ -6,15 +7,25 @@ var layers,
     y: 0
   },
   tile = [],
-  images = []
-var canvas,
+  images = [],
+  widthMax,
+  heightMax
+
+let canvas,
   ctx,
   image
-var camera = {
+//カメラ
+let camera = {
   x: 0,
   y: 0
 }
-var gamemode = "game"
+//スクリーン
+const screen_width = 640
+const screen_height = 480
+
+//ゲームモード
+let gamemode = "game"
+
 window.addEventListener("DOMContentLoaded", init)
 
 function init() {
@@ -22,22 +33,32 @@ function init() {
   //キャンパス要素
   canvas = document.getElementById("maincanvas")
   ctx = canvas.getContext("2d")
-  //タイル読み込み
-  image = new Image();
+  //マップタイル読み込み
+  image = new Image()
   image.src = "images/map_images/map1.png"
   image.addEventListener("load", function() {
-    backcanvas = document.createElement("canvas")
+    let backcanvas = document.createElement("canvas")
     backcanvas.width = 512
     backcanvas.height = 512
     const backctx = backcanvas.getContext("2d")
     backctx.drawImage(image, 0, 0)
     image = backcanvas
   })
+  //プレイヤーの読み込み
+  playerImages = new Image()
+  playerImages.src = "images/usa.png"
+  playerImages.addEventListener("load", function() {
+    let backcanvas = document.createElement("canvas")
+    backcanvas.width = 144
+    backcanvas.height = 192
+    const backctx = backcanvas.getContext("2d")
+    backctx.drawImage(playerImages, 0, 0)
+    playerImages = backcanvas
+  })
 
   //マップの生成
   mapload(function(event) {
     load_map(event);
-    stageSetup()
     requestAnimationFrame(updata)
   })
 
@@ -63,17 +84,13 @@ function load_map(event) {
   //タイル
   tile_rect.x = mainmap.tilewidth
   tile_rect.y = mainmap.tileheight
-}
-function stageSetup() {
-  //画像読み込み完了
-  image.addEventListener("load", renderSteage())
-}
-function renderSteage() {
 
-  const screen_width = 640
-  const screen_height = 480
-  const widthMax = map_width * tile_rect.x
-  const heightMax = map_height * tile_rect.y
+  //マップの大きさ
+  widthMax = map_width * tile_rect.x
+  heightMax = map_height * tile_rect.y
+}
+//ステージの描画
+function renderSteage() {
 
   const screenLeft = camera.x - screen_width / 2
   const screenTop = camera.y - screen_height / 2
@@ -107,7 +124,7 @@ function renderSteage() {
   } else {
     flame()
   }
-  //画面端の当たり判定
+  //画面端
   function flame() {
     if (camera.x <= screen_width / 2) {
       camera.x = screen_width / 2;
@@ -138,7 +155,11 @@ function render() {
       break;
     case "game":
       renderSteage();
-      player();
+      playerKey();
+      renderPlayer();
+      break;
+    case "clear":
+
       break;
   }
 
