@@ -76,7 +76,7 @@ function load_map(event) {
   var mainmap = JSON.parse(loadmap.responseText)
 
   //ステージ抽出
-  layer = mainmap.layers
+  layers = mainmap.layers
   //マップの横幅
   map_width = mainmap.width
   //マップ高さ
@@ -101,17 +101,17 @@ function renderSteage() {
   //レイヤー
   if (camera.x >= screen_width / 2 && camera.y >= screen_height / 2 && camera.x <= widthMax - (screen_width / 2) && camera.y <= heightMax - (screen_height / 2)) {
 
-    for (var i = 0; i < layer.length; i++) {
+    for (var i = 0; i < layers.length; i++) {
       //縦幅
       for (var y = 0; y < (screen_height / tile_rect.y) + 1; y++) {
         //横幅
         for (var x = 0; x < (screen_width / tile_rect.x) + 1; x++) {
 
           const index = startTileX + x + (startTileY + y) * map_width
-          if (index < 0 || index >= layer[i].data.length) {
+          if (index < 0 || index >= layers[i].data.length) {
             continue
           }
-          var id = layer[i].data[index] - 1
+          var id = layers[i].data[index] - 1
           var sx = (id % 16) * tile_rect.x
           var sy = Math.floor(id / 16) * tile_rect.y
           const dx = x * tile_rect.x - screenLeft % tile_rect.x
@@ -156,7 +156,7 @@ function render() {
     case "game":
       renderSteage();
       playerKey();
-      renderPlayer();
+      //  renderPlayer();
       break;
     case "clear":
 
